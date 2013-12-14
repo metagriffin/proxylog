@@ -1,0 +1,6 @@
+* add support for SSL
+  ==> obviously, the client must ignore cert warnings
+  ==> or the client is HTTP, but the outbound request is HTTPS.
+
+* extend prettification support to many formats including JSON, YAML, etc...
+  ==> lookinto libs to syntax-highlight, such as pygments
