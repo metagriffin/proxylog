@@ -128,6 +128,12 @@ def main(argv=None):
            ' (implies "--display")'))
 
   cli.add_argument(
+    _('-t'), _('--theme'), metavar=_('NAME'),
+    dest='theme', default=None, action='store',
+    help=_('overrides the default color theme; can be any of the'
+           ' styles supported by Pygments (implies "--color")'))
+
+  cli.add_argument(
     _('-u'), _('--uncompress'),
     dest='uncompress', default=False, action='store_true',
     help=_('uncompress body data (if compressed) before'
@@ -199,6 +205,9 @@ def main(argv=None):
 
   if options.syntax:
     options.uncompress = True
+
+  if options.theme:
+    options.color = True
 
   if options.color or options.uncompress:
     options.display = True

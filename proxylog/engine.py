@@ -70,8 +70,17 @@ class Logger(object):
     pass
 
 #------------------------------------------------------------------------------
-def syntaxify(content, contentType, color=False):
+def syntaxify_xml(content, contentType, color=False, theme=None):
+  # todo: use the color scheme from `theme`...
+  output = six.StringIO()
+  pxml.prettify(six.StringIO(content.strip()), output, strict=False, color=color)
+  return output.getvalue() or content
+
+#------------------------------------------------------------------------------
+def syntaxify(content, contentType, color=False, theme=None):
   try:
+    if contentType and contentType.startswith('application/yaml'):
+      contentType = 'text/x-yaml'
     lexer = pygments.lexers.get_lexer_for_mimetype(contentType)
   except Exception as err:
     if not contentType:
@@ -82,15 +91,9 @@ def syntaxify(content, contentType, color=False):
       return content
   if isinstance(lexer, pygments.lexers.XmlLexer):
     return syntaxify_xml(content, contentType, color=color)
-  formatter = pygments.formatters.Terminal256Formatter()#style='default')
+  formatter = pygments.formatters.Terminal256Formatter(style=theme or 'perldoc')
   result = pygments.highlight(content, lexer, formatter)
-  return result
-
-#------------------------------------------------------------------------------
-def syntaxify_xml(content, contentType, color=False):
-  output = six.StringIO()
-  pxml.prettify(six.StringIO(content.strip()), output, strict=False, color=color)
-  return output.getvalue() or content
+  return result or content
 
 #------------------------------------------------------------------------------
 class DisplayLogger(Logger):
@@ -110,7 +113,8 @@ class DisplayLogger(Logger):
       content = gunzip(content)
     if content and self.options.syntax:
       content = syntaxify(
-        content, headers.get('content-type'), color=self.options.color)
+        content, headers.get('content-type'),
+        color=self.options.color, theme=self.options.theme)
     if self.options.showPacket:
       print >>self.stream, self.options.markup.packet(
         '[{:0.3f}] {}:{} {} {}:{} ({:08x}.{:08x})'.format(
