@@ -2,5 +2,10 @@
   ==> obviously, the client must ignore cert warnings
   ==> or the client is HTTP, but the outbound request is HTTPS.
 
-* extend prettification support to many formats including JSON, YAML, etc...
-  ==> lookinto libs to syntax-highlight, such as pygments
+* add syntax prettification of json/yaml. is there a library
+  to do this? (pygments only colorizes... i want it restructured)
+
+* clean up colorizing vs. structurizing...
+
+* create support for a config file, eg ~/.config/proxylog.conf,
+  for: default color theme
