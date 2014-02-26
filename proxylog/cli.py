@@ -58,8 +58,8 @@ def getDefaultMarkup(color):
 def main(argv=None):
 
   cli = argparse.ArgumentParser(
-    description='A simple, xml-prettifying, colorizing, logging, HTTP proxy.',
-    )
+    description='A simple, logging, colorizing, prettifying, HTTP proxy.',
+  )
 
   cli.add_argument(
     _('-v'), _('--verbose'),
@@ -134,10 +134,11 @@ def main(argv=None):
            ' displaying it (implies "--display")'))
 
   cli.add_argument(
-    _('-x'), _('--prettify'),
-    dest='prettify', default=False, action='store_true',
-    help=_('known formats will be "prettified", including'
-           ' XML (implies "--uncompress" and "--display")'))
+    _('-x'), _('--syntax'),
+    dest='syntax', default=False, action='store_true',
+    help=_('turns on syntax highlighting for known formats'
+           ' including XML, YAML, and JSON (implies'
+           ' "--uncompress" and "--display")'))
 
   cli.add_argument(
     _('-b'), _('--breaklines'), metavar=_('COUNT'),
@@ -196,7 +197,7 @@ def main(argv=None):
   server.options = options
   server.logger  = MultiLogger()
 
-  if options.prettify:
+  if options.syntax:
     options.uncompress = True
 
   if options.color or options.uncompress:

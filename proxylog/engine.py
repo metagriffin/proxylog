@@ -32,6 +32,9 @@ import re
 import pxml
 from aadict import aadict
 from requests.structures import CaseInsensitiveDict as idict
+import pygments
+import pygments.lexers
+import pygments.formatters
 
 from .i18n import _
 
@@ -67,6 +70,29 @@ class Logger(object):
     pass
 
 #------------------------------------------------------------------------------
+def syntaxify(content, contentType, color=False):
+  try:
+    lexer = pygments.lexers.get_lexer_for_mimetype(contentType)
+  except Exception as err:
+    if not contentType:
+      return content
+    try:
+      lexer = pygments.lexers.guess_lexer(content)
+    except Exception as err:
+      return content
+  if isinstance(lexer, pygments.lexers.XmlLexer):
+    return syntaxify_xml(content, contentType, color=color)
+  formatter = pygments.formatters.Terminal256Formatter()#style='default')
+  result = pygments.highlight(content, lexer, formatter)
+  return result
+
+#------------------------------------------------------------------------------
+def syntaxify_xml(content, contentType, color=False):
+  output = six.StringIO()
+  pxml.prettify(six.StringIO(content.strip()), output, strict=False, color=color)
+  return output.getvalue() or content
+
+#------------------------------------------------------------------------------
 class DisplayLogger(Logger):
   def __init__(self, stream, *args, **kw):
     super(DisplayLogger, self).__init__(*args, **kw)
@@ -82,11 +108,9 @@ class DisplayLogger(Logger):
     if content and self.options.uncompress \
        and headers.get('content-encoding') == 'gzip':
       content = gunzip(content)
-    if content and self.options.prettify:
-      output = six.StringIO()
-      pxml.prettify(six.StringIO(content.strip()), output,
-                    strict=False, color=self.options.color)
-      content = output.getvalue() or content
+    if content and self.options.syntax:
+      content = syntaxify(
+        content, headers.get('content-type'), color=self.options.color)
     if self.options.showPacket:
       print >>self.stream, self.options.markup.packet(
         '[{:0.3f}] {}:{} {} {}:{} ({:08x}.{:08x})'.format(

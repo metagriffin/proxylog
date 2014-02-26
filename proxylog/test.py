@@ -51,7 +51,7 @@ rline: GET /path/to/data.xml HTTP/1.1
 content: '<root ><node attr="value"/></root>'
 headers:
   content-length: '34'
-  content-type: text/xml
+  content-type: application/xml
   date: Fri, 13 Feb 2009 23:31:30 GMT
   last-modified: Fri, 13 Feb 2009 23:31:30 GMT
   server: SimpleHTTP/0.6 Python/2.7.3
@@ -74,7 +74,7 @@ rline: HTTP/1.? 200 OK
 [32m  00000001.00000001 < (B[m(B[mDate: (B[mFri, 13 Feb 2009 23:31:30 GMT
 [32m  00000001.00000001 < (B[m(B[mLast-Modified: (B[mFri, 13 Feb 2009 23:31:30 GMT
 [32m  00000001.00000001 < (B[m(B[mContent-Length: (B[m34
-[32m  00000001.00000001 < (B[m(B[mContent-Type: (B[mtext/xml
+[32m  00000001.00000001 < (B[m(B[mContent-Type: (B[mapplication/xml
 [32m  00000001.00000001 < (B[m(B[mServer: (B[mSimpleHTTP/0.6 Python/2.7.3
 [32m  00000001.00000001 < (B[m
 [32m  00000001.00000001 < (B[m[32m<?xml version="1.0" encoding="UTF-8"?>(B[m
@@ -85,7 +85,7 @@ rline: HTTP/1.? 200 OK
 '''
     options = aadict(
       color     = True,
-      prettify  = True,
+      syntax    = True,
       infile    = six.StringIO(yaml),
       output    = six.StringIO(),
       errput    = six.StringIO(),
