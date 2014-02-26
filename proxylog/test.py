@@ -33,31 +33,60 @@ class TestProxylog(unittest.TestCase):
   maxDiff = None
 
   #----------------------------------------------------------------------------
-  def test_csv_input(self):
-    csv = '''\
-timestamp,rline,content-type,data
-1234567890.0,GET /path/to/resource HTTP/1.1,,
-1234567890.1,HTTP/1.? 200 OK,text/xml,"<root ><node attr=""value""/></root>"
+  def test_input_xml(self):
+    yaml = '''\
+---
+content: null
+headers:
+  host: host.example.com:80
+meta:
+  client: 127.0.0.1:1234
+  isRequest: true
+  processID: 1
+  requestID: 1
+  server: 127.0.0.1:80
+  ts: 1234567890.0
+rline: GET /path/to/data.xml HTTP/1.1
+---
+content: '<root ><node attr="value"/></root>'
+headers:
+  content-length: '34'
+  content-type: text/xml
+  date: Fri, 13 Feb 2009 23:31:30 GMT
+  last-modified: Fri, 13 Feb 2009 23:31:30 GMT
+  server: SimpleHTTP/0.6 Python/2.7.3
+meta:
+  client: 127.0.0.1:1234
+  isRequest: false
+  processID: 1
+  requestID: 1
+  server: 127.0.0.1:80
+  ts: 1234567890.1
+rline: HTTP/1.? 200 OK
 '''
     chk = u'''\
-[1m[35m[1234567890.000] local:0 --> remote:0 (00000000.00000001)(B[m
-[31m  00000000.00000001 > (B[m[1mGET /path/to/resource HTTP/1.1(B[m
-[31m  00000000.00000001 > (B[m
-[1m[35m[1234567890.100] local:0 <-- remote:0 (00000000.00000002)(B[m
-[32m  00000000.00000002 < (B[m[1mHTTP/1.? 200 OK(B[m
-[32m  00000000.00000002 < (B[m(B[mContent-Type: (B[mtext/xml
-[32m  00000000.00000002 < (B[m
-[32m  00000000.00000002 < (B[m[32m<?xml version="1.0" encoding="UTF-8"?>(B[m
-[32m  00000000.00000002 < (B[m[1m[35m<(B[m[1m[34mroot(B[m[1m[35m>(B[m
-[32m  00000000.00000002 < (B[m  [1m[35m<(B[m[1m[34mnode(B[m [1m[34mattr(B[m[1m[35m="(B[mvalue[1m[35m"(B[m[1m[35m/>(B[m
-[32m  00000000.00000002 < (B[m[1m[35m</(B[m[1m[34mroot(B[m[1m[35m>(B[m
-[32m  00000000.00000002 < (B[m
+[1m[35m[1234567890.000] 127.0.0.1:1234 --> 127.0.0.1:80 (00000001.00000001)(B[m
+[31m  00000001.00000001 > (B[m[1mGET /path/to/data.xml HTTP/1.1(B[m
+[31m  00000001.00000001 > (B[m(B[mHost: (B[mhost.example.com:80
+[31m  00000001.00000001 > (B[m
+[1m[35m[1234567890.100] 127.0.0.1:1234 <-- 127.0.0.1:80 (00000001.00000001)(B[m
+[32m  00000001.00000001 < (B[m[1mHTTP/1.? 200 OK(B[m
+[32m  00000001.00000001 < (B[m(B[mDate: (B[mFri, 13 Feb 2009 23:31:30 GMT
+[32m  00000001.00000001 < (B[m(B[mLast-Modified: (B[mFri, 13 Feb 2009 23:31:30 GMT
+[32m  00000001.00000001 < (B[m(B[mContent-Length: (B[m34
+[32m  00000001.00000001 < (B[m(B[mContent-Type: (B[mtext/xml
+[32m  00000001.00000001 < (B[m(B[mServer: (B[mSimpleHTTP/0.6 Python/2.7.3
+[32m  00000001.00000001 < (B[m
+[32m  00000001.00000001 < (B[m[32m<?xml version="1.0" encoding="UTF-8"?>(B[m
+[32m  00000001.00000001 < (B[m[1m[35m<(B[m[1m[34mroot(B[m[1m[35m>(B[m
+[32m  00000001.00000001 < (B[m  [1m[35m<(B[m[1m[34mnode(B[m [1m[34mattr(B[m[1m[35m="(B[mvalue[1m[35m"(B[m[1m[35m/>(B[m
+[32m  00000001.00000001 < (B[m[1m[35m</(B[m[1m[34mroot(B[m[1m[35m>(B[m
+[32m  00000001.00000001 < (B[m
 '''
     options = aadict(
-      csv       = True,
       color     = True,
       prettify  = True,
-      infile    = six.StringIO(csv),
+      infile    = six.StringIO(yaml),
       output    = six.StringIO(),
       errput    = six.StringIO(),
       markup    = getDefaultMarkup(True),

@@ -27,8 +27,7 @@ import BaseHTTPServer
 # todo: replace with six.urllib...
 import urllib2
 import time
-import pickle
-import csv
+import yaml
 import re
 import pxml
 from aadict import aadict
@@ -241,76 +240,31 @@ class StreamLogger(Logger):
   def __init__(self, stream, *args, **kw):
     super(StreamLogger, self).__init__(*args, **kw)
     self.stream = stream
-    if self.options.csv:
-      self.stream = csv.writer(self.stream, lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
-      self.stream.writerow(['timestamp', 'rline', 'content-type', 'data'])
   def logMessage(self, msg, rLine, headers, body):
-    if self.options.csv:
-      self.stream.writerow(
-        [msg.ts,
-         rLine,
-         headers.get('content-type', None),
-         body,
-         ])
-    else:
-      pickle.dump(['v0', dict(msg), rLine, dict(headers), body], self.stream)
+    self.stream.write('---\n')
+    meta = dict(msg)
+    if 'client' in meta:
+      meta['client'] = ':'.join(meta['client'])
+    if 'server' in meta:
+      meta['server'] = ':'.join(meta['server'])
+    data = dict(meta=meta, rline=str(rLine), headers=dict(headers), content=body)
+    yaml.dump(data, self.stream, default_flow_style=False)
+    self.stream.write('\n')
 
 #------------------------------------------------------------------------------
-# shamelessly scrubbed from:
-#   http://stackoverflow.com/questions/6556078/how-to-read-a-csv-file-from-a-stream-and-process-each-line-as-it-is-written
-class UnbufferedReadlineIterator(object):
-  'An iterator that calls readline() to get its next value.'
-  def __init__(self, f): self.f = f
-  def __iter__(self): return self
-  def next(self):
-    line = self.f.readline()
-    if line:
-      return line
-    raise StopIteration
-
-#------------------------------------------------------------------------------
-# todo: perhaps the replay-server could first try pickle, then fallback to csv?
 class ReplayServer(object):
   def __init__(self, options, stream):
     self.options  = options
     self.stream   = stream
   def serve_forever(self):
-    if self.options.csv:
-      return self._replayCsv(self.stream)
-    return self._replayPickle(self.stream)
-  def _replayCsv(self, stream):
-    reader  = csv.reader(UnbufferedReadlineIterator(stream))
-    headers = ['timestamp', 'rline', 'content-type', 'data']
-    count   = 0
-    for record in reader:
-      if 'timestamp' == record[0]:
-        headers = record
-        continue
-      count += 1
-      msg = aadict(zip(headers, record))
-      msg.ts        = float(msg.timestamp)
-      msg.isRequest = not msg.rline.startswith('HTTP')
-      msg.processID = 0
-      msg.requestID = count
-      msg.headers   = idict()
-      if msg.get('content-type'):
-        msg.headers['content-type'] = msg.get('content-type')
-      msg.client    = ('local', 0)
-      msg.server    = ('remote', 0)
-      self.logger.logMessage(msg, msg.rline, msg.headers, msg.data or None)
-  def _replayPickle(self, stream):
-    unpkl = pickle.Unpickler(stream)
-    while True:
-      try:
-        xaction = unpkl.load()
-        if xaction[0] != 'v0':
-          raise Exception(_(
-            'invalid proxylog dump or unsupported version: {!r}',
-            xaction[0]))
-        msg = aadict(xaction[1])
-        self.logger.logMessage(msg, xaction[2], xaction[3], xaction[4])
-      except EOFError:
-        break
+    for record in yaml.load_all(self.stream):
+      msg  = aadict(record['meta'])
+      hdrs = idict(record['headers'])
+      if 'client' in msg:
+        msg['client'] = msg['client'].split(':')
+      if 'server' in msg:
+        msg['server'] = msg['server'].split(':')
+      self.logger.logMessage(msg, record['rline'], hdrs, record['content'])
 
 #------------------------------------------------------------------------------
 # TODO: replace with `reparse` once it has been converted to a library...

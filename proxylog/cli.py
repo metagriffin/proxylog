@@ -115,12 +115,6 @@ def main(argv=None):
            ' "--output" (implies "--display")'))
 
   cli.add_argument(
-    _('--csv'),
-    dest='csv', default=False, action='store_true',
-    help=_('in output mode, generate CSV output; in replay'
-           ' mode, read CSV data'))
-
-  cli.add_argument(
     _('-d'), _('--display'),
     dest='display', default=False, action='store_true',
     help=_('display all transactions to STDOUT in human-'

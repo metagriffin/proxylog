@@ -45,6 +45,7 @@ dependencies = [
   'aadict               >= 0.2.1',
   'morph                >= 0.1.1',
   'requests             >= 2.1.0',
+  'PyYAML               >= 3.10',
 ]
 
 entrypoints = {
