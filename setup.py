@@ -35,7 +35,7 @@ def read(*parts, **kw):
 test_dependencies = [
   'nose                 >= 1.3.0',
   'coverage             >= 3.5.3',
-  ]
+]
 
 dependencies = [
   'distribute           >= 0.6.24',
@@ -45,13 +45,13 @@ dependencies = [
   'aadict               >= 0.2.1',
   'morph                >= 0.1.1',
   'requests             >= 2.1.0',
-  ]
+]
 
 entrypoints = {
   'console_scripts': [
     'proxylog           = proxylog.cli:main',
-    ],
-  }
+  ],
+}
 
 classifiers = [
   'Development Status :: 3 - Alpha',
@@ -62,7 +62,7 @@ classifiers = [
   'Operating System :: OS Independent',
   'Natural Language :: English',
   'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-  ]
+]
 
 setup(
   name                  = 'proxylog',
@@ -83,7 +83,7 @@ setup(
   test_suite            = 'proxylog',
   entry_points          = entrypoints,
   license               = 'GPLv3+',
-  )
+)
 
 #------------------------------------------------------------------------------
 # end of $Id$
