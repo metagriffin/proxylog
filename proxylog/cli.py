@@ -140,9 +140,9 @@ def main(argv=None):
            ' displaying it (implies "--display")'))
 
   cli.add_argument(
-    _('-x'), _('--syntax'),
-    dest='syntax', default=False, action='store_true',
-    help=_('turns on syntax highlighting for known formats'
+    _('-f'), _('--format'),
+    dest='format', default=False, action='store_true',
+    help=_('turns on format prettification of known formats'
            ' including XML, YAML, and JSON (implies'
            ' "--uncompress" and "--display")'))
 
@@ -203,7 +203,7 @@ def main(argv=None):
   server.options = options
   server.logger  = MultiLogger()
 
-  if options.syntax:
+  if options.format:
     options.uncompress = True
 
   if options.theme:

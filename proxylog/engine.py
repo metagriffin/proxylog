@@ -35,8 +35,11 @@ from requests.structures import CaseInsensitiveDict as idict
 import pygments
 import pygments.lexers
 import pygments.formatters
+import json
+import morph
 
 from .i18n import _
+from . import pyaml
 
 #------------------------------------------------------------------------------
 def mkdirp(path):
@@ -70,27 +73,59 @@ class Logger(object):
     pass
 
 #------------------------------------------------------------------------------
-def syntaxify_xml(content, contentType, color=False, theme=None):
+def getLexer(content, contentType):
+  try:
+    if contentType and ( '/yaml' in contentType or '+yaml' in contentType ):
+      contentType = 'text/x-yaml'
+    return pygments.lexers.get_lexer_for_mimetype(contentType)
+  except Exception:
+    try:
+      return pygments.lexers.guess_lexer(content)
+    except Exception:
+      return None
+
+#------------------------------------------------------------------------------
+def formatify_xml(content, contentType):
   # todo: use the color scheme from `theme`...
   output = six.StringIO()
-  pxml.prettify(six.StringIO(content.strip()), output, strict=False, color=color)
+  pxml.prettify(six.StringIO(content.strip()), output, strict=False, color=False)
   return output.getvalue() or content
 
 #------------------------------------------------------------------------------
-def syntaxify(content, contentType, color=False, theme=None):
+def u2s(obj):
+  if six.PY2 and isinstance(obj, unicode):
+    return obj.encode('utf-8')
+  if morph.isseq(obj):
+    return [u2s(el) for el in obj]
+  if morph.isdict(obj):
+    return {u2s(k): u2s(v) for k, v in obj.items()}
+  return obj
+
+#------------------------------------------------------------------------------
+def formatify_json(content, contentType):
   try:
-    if contentType and contentType.startswith('application/yaml'):
-      contentType = 'text/x-yaml'
-    lexer = pygments.lexers.get_lexer_for_mimetype(contentType)
+    return formatify_yaml(yaml.dump(u2s(json.loads(content))), 'application/yaml')
   except Exception as err:
-    if not contentType:
-      return content
-    try:
-      lexer = pygments.lexers.guess_lexer(content)
-    except Exception as err:
-      return content
+    return content
+
+#------------------------------------------------------------------------------
+def formatify_yaml(content, contentType):
+  return pyaml.prettify(content, strict=False, color=False)
+
+#------------------------------------------------------------------------------
+def formatify(content, contentType):
+  lexer = getLexer(content, contentType)
   if isinstance(lexer, pygments.lexers.XmlLexer):
-    return syntaxify_xml(content, contentType, color=color)
+    return formatify_xml(content, contentType)
+  if isinstance(lexer, pygments.lexers.JsonLexer):
+    return formatify_json(content, contentType)
+  if isinstance(lexer, pygments.lexers.YamlLexer):
+    return formatify_yaml(content, contentType)
+  return content
+
+#------------------------------------------------------------------------------
+def colorize(content, contentType, theme=None):
+  lexer = getLexer(content, contentType)
   formatter = pygments.formatters.Terminal256Formatter(style=theme or 'perldoc')
   result = pygments.highlight(content, lexer, formatter)
   return result or content
@@ -111,10 +146,11 @@ class DisplayLogger(Logger):
     if content and self.options.uncompress \
        and headers.get('content-encoding') == 'gzip':
       content = gunzip(content)
-    if content and self.options.syntax:
-      content = syntaxify(
-        content, headers.get('content-type'),
-        color=self.options.color, theme=self.options.theme)
+    if content and self.options.format:
+      content = formatify(content, headers.get('content-type'))
+    if content and self.options.color:
+      content = colorize(
+        content, headers.get('content-type'), theme=self.options.theme)
     if self.options.showPacket:
       print >>self.stream, self.options.markup.packet(
         '[{:0.3f}] {}:{} {} {}:{} ({:08x}.{:08x})'.format(

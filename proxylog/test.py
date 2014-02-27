@@ -77,15 +77,15 @@ rline: HTTP/1.? 200 OK
 [32m  00000001.00000001 < (B[m(B[mContent-Type: (B[mapplication/xml
 [32m  00000001.00000001 < (B[m(B[mServer: (B[mSimpleHTTP/0.6 Python/2.7.3
 [32m  00000001.00000001 < (B[m
-[32m  00000001.00000001 < (B[m[32m<?xml version="1.0" encoding="UTF-8"?>(B[m
-[32m  00000001.00000001 < (B[m[1m[35m<(B[m[1m[34mroot(B[m[1m[35m>(B[m
-[32m  00000001.00000001 < (B[m  [1m[35m<(B[m[1m[34mnode(B[m [1m[34mattr(B[m[1m[35m="(B[mvalue[1m[35m"(B[m[1m[35m/>(B[m
-[32m  00000001.00000001 < (B[m[1m[35m</(B[m[1m[34mroot(B[m[1m[35m>(B[m
+[32m  00000001.00000001 < (B[m[38;5;30m<?xml version="1.0" encoding="UTF-8"?>[39m
+[32m  00000001.00000001 < (B[m[38;5;90;01m<root[39;00m[38;5;90;01m>[39;00m
+[32m  00000001.00000001 < (B[m  [38;5;90;01m<node[39;00m [38;5;64mattr=[39m[38;5;167m"value"[39m[38;5;90;01m/>[39;00m
+[32m  00000001.00000001 < (B[m[38;5;90;01m</root>[39;00m
 [32m  00000001.00000001 < (B[m
 '''
     options = aadict(
       color     = True,
-      syntax    = True,
+      format    = True,
       infile    = six.StringIO(yaml),
       output    = six.StringIO(),
       errput    = six.StringIO(),
