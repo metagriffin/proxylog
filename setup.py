@@ -69,7 +69,7 @@ classifiers = [
 setup(
   name                  = 'proxylog',
   version               = read('VERSION.txt', default='0.0.1').strip(),
-  description           = 'A simple, xml-prettifying, colorizing, logging, HTTP proxy.',
+  description           = 'A simple, logging, colorizing, pretty-formatting, HTTP proxy.',
   long_description      = read('README.rst'),
   classifiers           = classifiers,
   author                = 'metagriffin',
