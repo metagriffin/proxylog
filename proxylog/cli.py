@@ -27,10 +27,29 @@ from aadict import aadict
 import morph
 import blessings
 import atexit
+import logging
 
 from .engine import parseSedExpression, ReplayServer, \
     MultiLogger, StreamLogger, DisplayLogger, LoggingRequestHandler
 from .i18n import _
+
+#------------------------------------------------------------------------------
+
+log = logging.getLogger(__name__)
+
+class LogFmt(logging.Formatter):
+  def lvlstr(self, level):
+    if level >= logging.CRITICAL : return '[**] CRITICAL:'
+    if level >= logging.ERROR    : return '[**] ERROR:'
+    if level >= logging.WARNING  : return '[++] WARNING:'
+    if level >= logging.INFO     : return '[--] INFO:'
+    # if level >= logging.DEBUG    : return '[  ] DEBUG:'
+    return '[  ]'
+  def format(self, record):
+    msg = record.getMessage()
+    #pfx = '%s|%s: ' % (self.levelString[record.levelno], record.name)
+    pfx = self.lvlstr(record.levelno) + ' '
+    return pfx + ('\n' + pfx).join(msg.split('\n'))
 
 #------------------------------------------------------------------------------
 def breaklines(options):
@@ -172,7 +191,16 @@ def main(argv=None):
   # convert options to a dict
   options = aadict(morph.omit(options))
 
-  options.errput = sys.stderr
+  #----------------------------------------------------------------------------
+
+  rootlog = logging.getLogger()
+  rootlog.setLevel(logging.ERROR)
+  handler = logging.StreamHandler()
+  handler.setFormatter(LogFmt())
+  rootlog.addHandler(handler)
+  if options.verbose == 1    : rootlog.setLevel(logging.INFO)
+  elif options.verbose == 2  : rootlog.setLevel(logging.DEBUG)
+  elif options.verbose > 2   : rootlog.setLevel(1)
 
   #----------------------------------------------------------------------------
 
@@ -180,11 +208,9 @@ def main(argv=None):
     options.display = True
     if options.infile == '-':
       options.infile = sys.stdin
-      if options.verbose:
-        print >>sys.stderr, _('[  ] replaying transactions from <STDIN>')
+      log.info(_('replaying transactions from <STDIN>'))
     else:
-      if options.verbose:
-        print >>sys.stderr, _('[  ] replaying transactions from "{}"', options.infile)
+      log.info(_('replaying transactions from "{}"', options.infile))
       options.infile = open(options.infile, 'rb')
       atexit.register(options.infile.close)
     server = ReplayServer(options, options.infile)
@@ -197,8 +223,7 @@ def main(argv=None):
     options.remote = (options.remote, port)
     options.local = ('localhost', options.local)
     server = BaseHTTPServer.HTTPServer(options.local, LoggingRequestHandler)
-    if options.verbose:
-      print >>sys.stderr, _('[  ] accepting connections on {}:{}', *options.local)
+    log.info(_('accepting connections on {}:{}', *options.local))
 
   server.options = options
   server.logger  = MultiLogger()
@@ -231,7 +256,7 @@ def main(argv=None):
     server.logger.loggers.append(DisplayLogger(sys.stdout, options=options))
 
   if not ( options.infile or options.outfile or options.display ):
-    print >>sys.stderr, _('[--] warning: no logging/displaying configured - acting as a simple proxy')
+    log.warn(_('no logging/displaying configured - acting as a simple proxy'))
 
   try:
     if not options.infile:
@@ -240,8 +265,7 @@ def main(argv=None):
       t.start()
     server.serve_forever()
   except KeyboardInterrupt:
-    if options.verbose:
-      print >>sys.stderr, _('[  ] exiting')
+    log.info(_('aborted by user - exiting'))
 
   return 0
 

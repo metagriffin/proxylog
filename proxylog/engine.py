@@ -37,9 +37,14 @@ import pygments.lexers
 import pygments.formatters
 import json
 import morph
+import logging
 
 from .i18n import _
 from . import pyaml
+
+#------------------------------------------------------------------------------
+
+log = logging.getLogger(__name__)
 
 #------------------------------------------------------------------------------
 def mkdirp(path):
@@ -199,9 +204,7 @@ class LoggingRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     LoggingRequestHandler.REQUESTNUM += 1
     self.rid = LoggingRequestHandler.REQUESTNUM
     self.pid = os.getpid()
-    if self.options.verbose:
-      print >>self.options.errput, \
-        _('[  ] connection from client: {}:{}', *client_address)
+    log.info(_('connection from client: {}:{}', *client_address))
     BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
   #----------------------------------------------------------------------------

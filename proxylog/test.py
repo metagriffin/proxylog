@@ -88,9 +88,8 @@ rline: HTTP/1.? 200 OK
       format    = True,
       infile    = six.StringIO(yaml),
       output    = six.StringIO(),
-      errput    = six.StringIO(),
       markup    = getDefaultMarkup(True),
-      )
+    )
     server = ReplayServer(options, options.infile)
     server.options = options
     server.logger  = DisplayLogger(options.output, options=options)
