@@ -311,9 +311,9 @@ class StreamLogger(Logger):
     self.stream.write('---\n')
     meta = dict(msg)
     if 'client' in meta:
-      meta['client'] = ':'.join(meta['client'])
+      meta['client'] = ':'.join([str(el) for el in meta['client']])
     if 'server' in meta:
-      meta['server'] = ':'.join(meta['server'])
+      meta['server'] = ':'.join([str(el) for el in meta['server']])
     data = dict(meta=meta, rline=str(rLine), headers=dict(headers), content=body)
     yaml.dump(data, self.stream, default_flow_style=False)
     self.stream.write('\n')
@@ -329,8 +329,10 @@ class ReplayServer(object):
       hdrs = idict(record['headers'])
       if 'client' in msg:
         msg['client'] = msg['client'].split(':')
+        msg['client'][1] = int(msg['client'][1])
       if 'server' in msg:
         msg['server'] = msg['server'].split(':')
+        msg['server'][1] = int(msg['server'][1])
       self.logger.logMessage(msg, record['rline'], hdrs, record['content'])
 
 #------------------------------------------------------------------------------
