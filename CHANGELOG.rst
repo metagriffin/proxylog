@@ -2,6 +2,12 @@
 ChangeLog
 =========
 
+v0.5
+====
+
+* Added more aggressive XML formatifying
+* Cleaned up verbose output to use logging subsystem
+
 
 v0.4
 ====
