@@ -121,7 +121,8 @@ def formatify_yaml(content, contentType):
 def formatify(content, contentType):
   lexer = getLexer(content, contentType)
   log.debug('formatifying content-type %r (lexer %r)', contentType, lexer)
-  if isinstance(lexer, pygments.lexers.XmlLexer):
+  if isinstance(lexer, (pygments.lexers.XmlLexer, pygments.lexers.LassoXmlLexer)) \
+      or ( contentType and ( '/xml' in contentType or '+xml' in contentType ) ):
     return formatify_xml(content, contentType)
   if isinstance(lexer, pygments.lexers.JsonLexer):
     return formatify_json(content, contentType)
