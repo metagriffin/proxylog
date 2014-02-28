@@ -204,7 +204,7 @@ class LoggingRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     LoggingRequestHandler.REQUESTNUM += 1
     self.rid = LoggingRequestHandler.REQUESTNUM
     self.pid = os.getpid()
-    log.info(_('connection from client: {}:{}', *client_address))
+    log.info('connection from client: %s:%r', *client_address)
     BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
   #----------------------------------------------------------------------------

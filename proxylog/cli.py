@@ -51,6 +51,18 @@ class LogFmt(logging.Formatter):
     pfx = self.lvlstr(record.levelno) + ' '
     return pfx + ('\n' + pfx).join(msg.split('\n'))
 
+def LogRecord_getMessage_i18n(self):
+  tmp = self.args
+  self.args = None
+  msg = self._real_getMessage()
+  self.args = tmp
+  if tmp:
+    return _(msg) % tmp
+  return _(msg)
+
+logging.LogRecord._real_getMessage = logging.LogRecord.getMessage
+logging.LogRecord.getMessage = LogRecord_getMessage_i18n
+
 #------------------------------------------------------------------------------
 def breaklines(options):
   while True:
@@ -208,9 +220,9 @@ def main(argv=None):
     options.display = True
     if options.infile == '-':
       options.infile = sys.stdin
-      log.info(_('replaying transactions from <STDIN>'))
+      log.info('replaying transactions from <STDIN>')
     else:
-      log.info(_('replaying transactions from "{}"', options.infile))
+      log.info('replaying transactions from "%s"', options.infile)
       options.infile = open(options.infile, 'rb')
       atexit.register(options.infile.close)
     server = ReplayServer(options, options.infile)
@@ -223,7 +235,7 @@ def main(argv=None):
     options.remote = (options.remote, port)
     options.local = ('localhost', options.local)
     server = BaseHTTPServer.HTTPServer(options.local, LoggingRequestHandler)
-    log.info(_('accepting connections on {}:{}', *options.local))
+    log.info('accepting connections on %s:%r', *options.local)
 
   server.options = options
   server.logger  = MultiLogger()
@@ -256,7 +268,7 @@ def main(argv=None):
     server.logger.loggers.append(DisplayLogger(sys.stdout, options=options))
 
   if not ( options.infile or options.outfile or options.display ):
-    log.warn(_('no logging/displaying configured - acting as a simple proxy'))
+    log.warn('no logging/displaying configured - acting as a simple proxy')
 
   try:
     if not options.infile:
@@ -265,7 +277,7 @@ def main(argv=None):
       t.start()
     server.serve_forever()
   except KeyboardInterrupt:
-    log.info(_('aborted by user - exiting'))
+    log.info('aborted by user - exiting')
 
   return 0
 
