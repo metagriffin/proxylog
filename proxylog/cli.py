@@ -28,6 +28,7 @@ import morph
 import blessings
 import atexit
 import logging
+import asset
 
 from .engine import parseSedExpression, ReplayServer, \
     MultiLogger, StreamLogger, DisplayLogger, LoggingRequestHandler
@@ -91,6 +92,11 @@ def main(argv=None):
   cli = argparse.ArgumentParser(
     description='A simple, logging, colorizing, prettifying, HTTP proxy.',
   )
+
+  cli.add_argument(
+    _('--version'),
+    dest='version', action='version',
+    version='%(prog)s/' + asset.version('proxylog'))
 
   cli.add_argument(
     _('-v'), _('--verbose'),

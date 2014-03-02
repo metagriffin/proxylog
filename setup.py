@@ -44,6 +44,7 @@ dependencies = [
   'six                  >= 1.4.1',
   'aadict               >= 0.2.1',
   'morph                >= 0.1.1',
+  'asset                >= 0.6',
   'requests             >= 2.1.0',
   'PyYAML               >= 3.10',
   'Pygments             >= 1.6',
