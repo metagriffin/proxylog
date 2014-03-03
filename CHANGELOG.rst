@@ -2,6 +2,13 @@
 ChangeLog
 =========
 
+
+v0.6
+====
+
+* Added "--version" program option
+
+
 v0.5
 ====
 
